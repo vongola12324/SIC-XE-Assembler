@@ -20,13 +20,13 @@ class Logger():
                 self.__log = open(self.__log_name)
                 self.__lastlog_time = self.__log.readline()[1:20]
                 self.__log.close()
-                os.rename(self.__log_name, self.__log_name + "." + self.__lastlog_time)
+                os.rename(self.__log_name,  self.__lastlog_time + "-" + self.__log_name)
             self.__log = open(self.__log_name, "w")
         if os.access(self.__err_name, os.W_OK):
             self.__err = open(self.__err_name)
             self.__lastlog_time = self.__err.readline()[1:20]
             self.__err.close()
-            os.rename(self.__err_name, self.__err_name + "." + self.__lastlog_time)
+            os.rename(self.__err_name, self.__lastlog_time + "-" + self.__err_name)
         self.__err = open(self.__err_name, "w")
         t = time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime(time.time()))
         if self.__debug_mode:

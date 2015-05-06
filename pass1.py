@@ -65,7 +65,9 @@ def pass1(logger):
             else:
                 logger.log("Invalid operation code!", error_flag=True)
                 return
-        fout.write(toLoc(LOCCTR) + line)
+            writeline(fout, LOCCTR, word)
+        else:
+            fout.write("        " + line)
         (line,word) = getline(fin)
         linenum += 1
     fout.write(toLoc(LOCCTR) + line)
@@ -74,11 +76,33 @@ def pass1(logger):
 
 def getline(fin):
     line = fin.readline()
-    lnsp = line[:36].strip().split(" ")
-    while lnsp.count("")>0 :
+    word = {}
+
+    # Get Label (0:8)
+    lnsp = line[0:8].strip().split(" ")
+    while lnsp.count("") > 0:
         lnsp.remove("")
-    if len(lnsp) > 2:
-        word = {"LABEL":lnsp[0], "OPCODE":lnsp[1], "OPER":lnsp[2]}
-    else:
-        word = {"OPCODE":lnsp[0], "OPER":lnsp[1]}
+    if lnsp != "":
+        word.update({"LABEL":lnsp})
+
+    # Get Opcode (9:15)
+    lnsp = line[9:15].strip().split(" ")
+    while lnsp.count("") > 0:
+        lnsp.remove("")
+    word.update({"OPCODE":lnsp})
+
+    # Get Operand (17:35)
+    lnsp = line[17:35].strip().split(" ")
+    while lnsp.count("") > 0:
+        lnsp.remove("")
+    word.update({"OPER":lnsp})
+
+    # Get Comment (36:66)
+    lnsp = line[36:66].strip()
+    if lnsp != "":
+        word.update({"COMMENT":lnsp})
+
     return (line, word)
+
+def writeline(fout, locctr, word):
+    fout.write('{0:<04d}    {1:<8s} {2:<5s}  {3:<18s}'.format(locctr, word.get("LABEL") if word.get("LABEL")!= None else " ", word.get("OPCODE"), word.get("OPER")))

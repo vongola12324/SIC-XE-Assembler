@@ -13,3 +13,15 @@ format = {"ADD":3, "ADDF":3, "ADDR":2, "AND":3, "CLEAR":2, "COMP":3, "COMPF":3, 
           "SHIFTR":2, "SIO":1, "SSK":3, "STA":3, "STB":3, "STCH":3, "STF":3, "STI":3, "STL":3, "STS":3, "STSW":3, "STT":3, "STX":3,
           "SUB":3, "SUBF":3, "SUBR":2, "SVC":2, "TD":3, "TIO":1, "TIX":3, "TIXR":2, "WD":3}
 register = {"A":0, "X":1, "L":2, "B":3, "S":4, "T":5, "F":6, "PC":8, "SW":9}
+
+SYMTAB = {}
+
+def toLoc(LOCCTR):
+    string = ""
+    while LOCCTR > 15 :
+        string += DecDig.get(LOCCTR%16)
+        LOCCTR /= 16
+    string += DecDig.get(LOCCTR)
+    while len(string)<4:
+        string = "0"+ string
+    return string

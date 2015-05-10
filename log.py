@@ -2,6 +2,7 @@ import os
 import time
 import datetime
 
+
 class Logger():
     __debug_mode = False
     __err = None
@@ -13,14 +14,14 @@ class Logger():
     __error_flag = False
     __tstart = None
 
-    def __init__(self, debug_mode = False):
+    def __init__(self, debug_mode=False):
         self.__debug_mode = debug_mode
-        if self.__debug_mode :
+        if self.__debug_mode:
             if os.access(self.__log_name, os.W_OK):
                 self.__log = open(self.__log_name)
                 self.__lastlog_time = self.__log.readline()[1:20]
                 self.__log.close()
-                os.rename(self.__log_name,  self.__lastlog_time + "-" + self.__log_name)
+                os.rename(self.__log_name, self.__lastlog_time + "-" + self.__log_name)
             self.__log = open(self.__log_name, "w")
         if os.access(self.__err_name, os.W_OK):
             self.__err = open(self.__err_name)
@@ -34,7 +35,7 @@ class Logger():
         self.__err.write("[" + t + "]" + "[INFO] Assembler Start!")
         self.__tstart = datetime.datetime.now()
 
-    def log(self, string, error_flag = False):
+    def log(self, string, error_flag=False):
         if error_flag:
             self.error(string)
             self.__error_flag = error_flag
@@ -46,6 +47,7 @@ class Logger():
         if self.__debug_mode:
             self.logInFile(info_str)
             self.logInConsole(info_str)
+
     def error(self, string):
         error_str = "[" + time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime(time.time())) + "]ERROR: " + string
         self.logInFile(error_str)

@@ -2,6 +2,7 @@ from pass1 import pass1
 from pass2 import pass2
 from log import Logger
 import sys
+import os
 
 # Program Info
 __version__ = '1.0'
@@ -60,7 +61,7 @@ else:
 
 ojout = getArgvValue("--ojout")
 if ojout == None:
-    ojout = input("Enter Output Filename[ObjectList.txt]")
+    ojout = input("Enter Output Filename[ObjectList.txt]: ")
     if len(ojout) < 1:
         ojout = "ObjectList.txt"
 else:

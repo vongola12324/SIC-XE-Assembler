@@ -17,6 +17,7 @@ def pass1(logger, filename):
     # Get Start Label
     line = fin.readline()
     linenum = 1
+    LOCCTR = 0
     word = line.strip().split(" ")
     while word.count("") > 0:
         word.remove("")
@@ -24,7 +25,7 @@ def pass1(logger, filename):
         logger.log("Label \"START\" found at line 0!")
         logger.log("Use " + str(word[2]) + " as default LOCCTR and STARTADDR!")
         STARTADDR = word[2]
-        LOCCTR = STARTADDR
+        LOCCTR = int(STARTADDR)
         fout.write(line)
     else:
         logger.log("Label \"START\" not found!")
@@ -37,38 +38,37 @@ def pass1(logger, filename):
     linenum += 1
     while word.get("OPCODE") != "END":
         if word.get("LABEL") != "." and word.get("OPCODE") != ".":
-            if word.get("LABEL") != None:
-                if SYMTAB.get(word.get("LABEL")) == None:
-                    SYMTAB.update({word[0]: LOCCTR})
+            if word.get("LABEL") is not None:
+                if SYMTAB.get(word.get("LABEL")) is None:
+                    SYMTAB.update({word.get("LABEL"): LOCCTR})
                 else:
                     logger.log("Duplicate symbol!", error_flag=True)
                     return
-            if OPTAB.get(word.get("OPCODE")) != None:
-                logger.log("Label \"" + word.get("OPCODE") + "\" found at line " + str(linenum) + "! LOCCTR += 3")
+            if OPTAB.get(word.get("OPCODE")) is not None:
+                logger.log("OpCode \"" + word.get("OPCODE") + "\" found at line " + str(linenum) + "! LOCCTR += 3")
                 LOCCTR += 3
             elif word.get("OPCODE") == "WORD":
-                logger.log("Label \"WORD\" found at line " + str(linenum) + "! LOCCTR += 3")
+                logger.log("OpCode \"WORD\" found at line " + str(linenum) + "! LOCCTR += 3")
                 LOCCTR += 3
             elif word.get("OPCODE") == "RESW":
-                logger.log(
-                    "Label \"RESW\" found at line " + str(linenum) + "! LOCCTR += " + str(3 * int(word.get("OPER"))))
+                logger.log("OpCode \"RESW\" found at line " + str(linenum) + "! LOCCTR += " + str(3 * int(word.get("OPER"))))
                 LOCCTR += 3 * int(word.get("OPER"))
             elif word.get("OPCODE") == "RESB":
-                logger.log("Label \"RESB\" found at line " + str(linenum) + "! LOCCTR += " + word.get("OPER"))
+                logger.log("OpCode \"RESB\" found at line " + str(linenum) + "! LOCCTR += " + word.get("OPER"))
                 LOCCTR += int(word.get("OPER"))
             elif word.get("OPCODE") == "BYTE":
                 OPERAND = word.get("OPER").strip().split("\'")
                 if OPERAND[0] == 'C' or OPERAND[1] == 'c':
                     LOCCTR += len(OPERAND[1])
-                    logger.log("Label \"BYTE\" found at line " + str(linenum) + "! LOCCTR += " + str(len(OPERAND[1])))
+                    logger.log("OpCode \"BYTE\" found at line " + str(linenum) + "! LOCCTR += " + str(len(OPERAND[1])))
                 else:
                     LOCCTR += len(OPERAND[1]) / 2
-                    logger.log(
-                        "Label \"BYTE\" found at line " + str(linenum) + "! LOCCTR += " + str(len(OPERAND[1]) / 2))
+                    logger.log("OpCode \"BYTE\" found at line " + str(linenum) + "! LOCCTR += " + str(len(OPERAND[1]) / 2))
 
             else:
                 logger.log("Invalid operation code!", error_flag=True)
                 return
+            print("2")
             writeline(fout, LOCCTR, word)
         else:
             fout.write("        " + line)
@@ -82,35 +82,33 @@ def pass1(logger, filename):
 def getline(fin):
     line = fin.readline()
     word = {}
+    if line[0] is ".":
+        word.update({"LABEL":"."})
+        return line, word
 
     # Get Label (0:8)
-    lnsp = line[0:8].strip().split(" ")
-    while lnsp.count("") > 0:
-        lnsp.remove("")
+    lnsp = line[0:8].strip()
     if lnsp != "":
         word.update({"LABEL": lnsp})
 
-    # Get Opcode (9:15)
-    lnsp = line[9:15].strip().split(" ")
-    while lnsp.count("") > 0:
-        lnsp.remove("")
+    # Get Opcode (8:15)
+    lnsp = line[8:16].strip()
     word.update({"OPCODE": lnsp})
 
     # Get Operand (17:35)
-    lnsp = line[17:35].strip().split(" ")
-    while lnsp.count("") > 0:
-        lnsp.remove("")
+    lnsp = line[16:35].strip()
     word.update({"OPER": lnsp})
 
-    # Get Comment (36:66)
-    lnsp = line[36:66].strip()
-    if lnsp != "":
-        word.update({"COMMENT": lnsp})
-
-    return (line, word)
+    # # Get Comment (36:66)
+    # lnsp = line[36:66].strip()
+    # if lnsp != "":
+    # word.update({"COMMENT": lnsp})
+    print(word)
+    return line, word
 
 
 def writeline(fout, locctr, word):
     fout.write(
-        '{0:<04d}    {1:<8s} {2:<5s}  {3:<18s}'.format(locctr, word.get("LABEL") if word.get("LABEL") != None else " ",
+        '{0:<04d}    {1:<8s} {2:<5s}  {3:<18s}'.format(locctr,
+                                                       word.get("LABEL") if word.get("LABEL") is not None else " ",
                                                        word.get("OPCODE"), word.get("OPER")))

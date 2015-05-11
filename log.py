@@ -39,11 +39,14 @@ class Logger():
         self.__error_flag = False
 
     def log(self, string, error_flag=False):
-        if not error_flag:
+        if error_flag is False:
             self.info(string)
-        else:
+        elif error_flag is True:
             self.error(string)
             self.__error_flag = error_flag
+        else:
+            self.error(string, error_flag)
+            self.info(string)
 
     def info(self, string):
         info_str = "[" + time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime(time.time())) + "]INFO: " + string
@@ -51,8 +54,11 @@ class Logger():
             self.logInFile(info_str)
             self.logInConsole(info_str)
 
-    def error(self, string):
-        error_str = "[" + time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime(time.time())) + "]ERROR: " + string
+    def error(self, string, error_flag):
+        if error_flag is "Important":
+            error_str = "[" + time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime(time.time())) + "]INFO: " + string
+        else:
+            error_str = "[" + time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime(time.time())) + "]ERROR: " + string
         self.logInFile(error_str, True)
         self.logInConsole(error_str)
 

@@ -70,20 +70,20 @@ else:
 
 # Start
 
-# try:
-programSize = pass1(logger=logger, filename=fin)
-# except:
-#     logger.log("Pass 1 Failed, view the error log to get error message", error_flag=True)
-#     logger.endLog()
-#     sys.exit(1)
-# else:
-print(logger.getErrorFlag())
-if logger.getErrorFlag() is True:
+try:
+    programSize = pass1(logger=logger, filename=fin)
+except:
     logger.log("Pass 1 Failed, view the error log to get error message", error_flag=True)
     logger.endLog()
     sys.exit(1)
 else:
-    logger.log("Pass 1 Finished.")
+    err_flag = logger.getErrorFlag()
+    if err_flag is True:
+        logger.log("Pass 1 Failed, view the error log to get error message", error_flag=True)
+        logger.endLog()
+        sys.exit(1)
+    else:
+        logger.log("Pass 1 Finished.", error_flag="Important")
 
 # # PASS 2, if pass1 successful
 # pass2(logger=logger, programSize=programSize, hrfout=hrout, ojfout=ojout)

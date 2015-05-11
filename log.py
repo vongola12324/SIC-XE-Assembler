@@ -67,9 +67,9 @@ class Logger():
     def endLog(self):
         t = (datetime.datetime.now() - self.__tstart).seconds
         if not self.__error_flag:
-            self.log("Assembler Finished!" + "(" + t + "s)")
+            self.log("Assembler Finished!" + "(" + str(t) + "s)")
         else:
-            self.log("Assembler Stopped!" + "(" + t + "s)")
+            self.log("Assembler Stopped!" + "(" + str(t) + "s)")
         if self.__debug_mode:
             self.__log.close()
         self.__err.close()

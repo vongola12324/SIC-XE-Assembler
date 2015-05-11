@@ -25,3 +25,22 @@ def toLoc(LOCCTR):
     while len(string)<4:
         string = "0"+ string
     return string
+
+def ObjSize(Tstart, NowObj):
+    start = toDec(Tstart)
+    end = toDec(NowObj)
+    return end-start
+
+def toDec(HexStr):
+    ans = 0
+    for i in HexStr:
+        ans = ans * 10 + HexDig.get(i)
+    return ans
+
+def toHex(DecStr):
+    hexstr = ""
+    while DecStr > 16:
+        hexstr += DecDig.get(DecStr%16)
+        DecStr = (DecStr - DecStr%16)/16
+    hexstr += DecDig.get(DecStr%16)
+    return hexstr

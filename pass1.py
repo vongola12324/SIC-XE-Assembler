@@ -1,15 +1,15 @@
 from data import *
 
 
-def pass1(logger):
+def pass1(logger, filename):
     # Open file
     try:
-        fin = open("Input", "r")
+        fin = open(filename, "r")
     except:
         logger.log("Can not open input file for pass1 with read mode!", error_flag=True)
         return
     try:
-        fout = open("intermediate", "w")
+        fout = open(".pass1.tmp", "w")
     except:
         logger.log("Can not open output file for pass1 with write mode!", error_flag=True)
         return

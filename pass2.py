@@ -1,21 +1,20 @@
 from data import *
 
-
-def pass2(logger, pragramSize):
+def pass2(logger, pragramSize, hrfout, ojfout):
     # Open file
     try:
-        fin = open("intermediate", "r")
+        fin = open(".pass1.tmp", "r")
     except:
         logger.log("Can not open input file for pass2 with read mode!", error_flag=True)
         return
     try:
-        ojout = open("ojOut.txt", "w")
+        ojout = open(hrfout, "w")
     except:
         logger.log("Can not open output file for pass2 with write mode!", error_flag=True)
         return
 
     try:
-        hrout = open("hrOut.txt", "w")
+        hrout = open(ojfout, "w")
     except:
         logger.log("Can not open output file for pass2 with write mode!", error_flag=True)
         return
@@ -29,13 +28,28 @@ def pass2(logger, pragramSize):
     hrout.write("H"+word[0]+" "*(6-int((len(word[0])+1))%6)+"00"+word[2]+"00"+pragramSize)
     TStart = word[2]
     ObjList = []
-    ObjListSize = 0
+    objc = ""
     (line, word) = getline(fin)
     while word.get("OPCODE") != "END":
         if word.get("LOC") != ".":
             if OPTAB.get(word.get("OPCODE")):
                 if SYMTAB.get(word.get("OPER")) != None:
                     word.update({"OPERADDR":SYMTAB.get(word.get("OPER"))})
+                    objc = OPTAB.get(word.get("OPCODE")) + word.get("OPERADDR")
+                    if len(word.get("OPER").split(",")) > 1:
+                        objca = []
+                        for i in objc:
+                            objca.append(ord(i))
+                        objca[2]+=1
+                        if objca[2] > 9:
+                            objca[2] -= 10
+                            objca[1] += 1
+                        if objca[1] > 9:
+                            objca[1] -= 10
+                            objca[0] += 1
+                        objc = ""
+                        for i in objca:
+                            objc += chr(i)
                 else:
                     word.update({"OPERADDR":0})
                     logger.log("Undefined symbol!", error_flag=True)
@@ -52,7 +66,7 @@ def pass2(logger, pragramSize):
                 objc = ""
                 for i in string:
                     objc = hex(ord(i))[2:]
-        if ObjListSize > 30:
+        if ObjSize(TStart, word.get()) > 30:
             TextRecode = "T" + "00" + TStart
             for i in ObjList:
                 TextRecode += "00" + i

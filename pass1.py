@@ -27,7 +27,7 @@ def pass1(logger, filename):
         logger.log("Use " + str(word[2]) + " as default LOCCTR and STARTADDR!")
         STARTADDR = toDec(word[2])
         LOCCTR = STARTADDR
-        fout.write(str(word[2]) + "    " + line)
+        fout.write("{0:04X}    {1:<8s} {2:<5s}  {3:<18s}".format(toDec(word[2]), word[0], word[1], str(word[2])) + "\n")
     else:
         logger.log("Label \"START\" not found!")
         logger.log("Use 0 as default LOCCTR and STARTADDR!")
@@ -106,7 +106,6 @@ def getline(fin):
     # lnsp = line[36:66].strip()
     # if lnsp != "":
     # word.update({"COMMENT": lnsp})
-    print(word)
     return line, word
 
 

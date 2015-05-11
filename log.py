@@ -54,7 +54,7 @@ class Logger():
             self.logInFile(info_str)
             self.logInConsole(info_str)
 
-    def error(self, string, error_flag):
+    def error(self, string, error_flag=True):
         if error_flag is "Important":
             error_str = "[" + time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime(time.time())) + "]INFO: " + string
         else:

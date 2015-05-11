@@ -55,8 +55,8 @@ class Logger():
 
     def logInFile(self, string):
         if self.__debug_mode:
-            self.__log.write(string)
-        self.__err.write(string)
+            self.__log.write(string+"\n")
+        self.__err.write(string+"\n")
 
     def logInConsole(self, string):
         print(string)

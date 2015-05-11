@@ -75,8 +75,7 @@ def pass2(logger, pragramSize, hrfout, ojfout):
             ObjListSize = 0
             TStart = word.get("LOC")
         ObjList.append(objc)
-        ObjListSize += 3
-        writeline(line, objcode)
+        writeline(line, objc)
         (line, word) = getline(fin)
     TEnd = "T"
     for i in ObjList:

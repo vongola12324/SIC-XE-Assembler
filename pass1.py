@@ -18,15 +18,16 @@ def pass1(logger, filename):
     line = fin.readline()
     linenum = 1
     LOCCTR = 0
+    nextLOC = LOCCTR
     word = line.strip().split(" ")
     while word.count("") > 0:
         word.remove("")
     if word[1] == "START":
         logger.log("Label \"START\" found at line 0!")
         logger.log("Use " + str(word[2]) + " as default LOCCTR and STARTADDR!")
-        STARTADDR = word[2]
-        LOCCTR = int(STARTADDR)
-        fout.write(line)
+        STARTADDR = toDec(word[2])
+        LOCCTR = STARTADDR
+        fout.write(str(word[2]) + "    " + line)
     else:
         logger.log("Label \"START\" not found!")
         logger.log("Use 0 as default LOCCTR and STARTADDR!")
@@ -34,8 +35,10 @@ def pass1(logger, filename):
         STARTADDR = 0
 
     # Calc LOCCTR for every line excluding comment
+    nextLOC = LOCCTR
     (line, word) = getline(fin)
     linenum += 1
+    logger.log("Line \"" + str(linenum) + "\" loaded. ")
     while word.get("OPCODE") != "END":
         if word.get("LABEL") != "." and word.get("OPCODE") != ".":
             if word.get("LABEL") is not None:
@@ -46,35 +49,35 @@ def pass1(logger, filename):
                     return
             if OPTAB.get(word.get("OPCODE")) is not None:
                 logger.log("OpCode \"" + word.get("OPCODE") + "\" found at line " + str(linenum) + "! LOCCTR += 3")
-                LOCCTR += 3
+                nextLOC += 3
             elif word.get("OPCODE") == "WORD":
                 logger.log("OpCode \"WORD\" found at line " + str(linenum) + "! LOCCTR += 3")
-                LOCCTR += 3
+                nextLOC += 3
             elif word.get("OPCODE") == "RESW":
                 logger.log("OpCode \"RESW\" found at line " + str(linenum) + "! LOCCTR += " + str(3 * int(word.get("OPER"))))
-                LOCCTR += 3 * int(word.get("OPER"))
+                nextLOC += 3 * int(word.get("OPER"))
             elif word.get("OPCODE") == "RESB":
                 logger.log("OpCode \"RESB\" found at line " + str(linenum) + "! LOCCTR += " + word.get("OPER"))
-                LOCCTR += int(word.get("OPER"))
+                nextLOC += int(word.get("OPER"))
             elif word.get("OPCODE") == "BYTE":
-                OPERAND = word.get("OPER").strip().split("\'")
-                if OPERAND[0] == 'C' or OPERAND[1] == 'c':
-                    LOCCTR += len(OPERAND[1])
-                    logger.log("OpCode \"BYTE\" found at line " + str(linenum) + "! LOCCTR += " + str(len(OPERAND[1])))
+                operand = word.get("OPER").strip().split("\'")
+                if operand[0] == 'C' or operand[1] == 'c':
+                    nextLOC += len(operand[1])
+                    logger.log("OpCode \"BYTE\" found at line " + str(linenum) + "! LOCCTR += " + str(len(operand[1])))
                 else:
-                    LOCCTR += len(OPERAND[1]) / 2
-                    logger.log("OpCode \"BYTE\" found at line " + str(linenum) + "! LOCCTR += " + str(len(OPERAND[1]) / 2))
+                    nextLOC += int(len(operand[1])/ 2)
+                    logger.log("OpCode \"BYTE\" found at line " + str(linenum) + "! LOCCTR += " + str(len(operand[1]) / 2))
 
             else:
                 logger.log("Invalid operation code!", error_flag=True)
                 return
-            print("2")
             writeline(fout, LOCCTR, word)
+            LOCCTR = nextLOC
         else:
-            fout.write("        " + line)
+            fout.write(line)
         (line, word) = getline(fin)
         linenum += 1
-    fout.write(toLoc(LOCCTR) + line)
+    fout.write("{0:04X}    {1:<8s} {2:<5s}  {3:<18s}".format(LOCCTR, " ", word.get("OPCODE"), word.get("OPER")) + "\n")
     logger.log("Label \"END\" found at line " + str(linenum) + "!")
     return LOCCTR - STARTADDR
 
@@ -109,6 +112,6 @@ def getline(fin):
 
 def writeline(fout, locctr, word):
     fout.write(
-        '{0:<04d}    {1:<8s} {2:<5s}  {3:<18s}'.format(locctr,
+        '{0:<04X}    {1:<8s} {2:<5s}  {3:<18s}\n'.format(locctr,
                                                        word.get("LABEL") if word.get("LABEL") is not None else " ",
                                                        word.get("OPCODE"), word.get("OPER")))

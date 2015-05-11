@@ -36,6 +36,7 @@ class Logger():
             self.__log.write("[" + t + "]" + "INFO: Assembler Start!\n")
         self.__err.write("[" + t + "]" + "INFO: Assembler Start!\n")
         self.__tstart = datetime.datetime.now()
+        self.__error_flag = False
 
     def log(self, string, error_flag=False):
         if not error_flag:

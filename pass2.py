@@ -1,6 +1,6 @@
 from data import *
 
-def pass2(logger, pragramSize, hrfout, ojfout):
+def pass2(logger, programSize, hrfout, ojfout):
     # Open file
     try:
         fin = open(".pass1.tmp", "r")

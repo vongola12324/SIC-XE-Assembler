@@ -18,12 +18,14 @@ SYMTAB = {}
 
 def toLoc(LOCCTR):
     string = ""
-    while LOCCTR > 15 :
-        string += DecDig.get(LOCCTR%16)
-        LOCCTR /= 16
-    string += DecDig.get(LOCCTR)
-    while len(string)<4:
-        string = "0"+ string
+    loc = LOCCTR
+    while loc > 15 :
+        print("loc = " + str(loc) + " str = " + string)
+        string += DecDig.get(loc%16)
+        loc = int((loc-loc%16)/16)
+    string = DecDig.get(LOCCTR) + string
+    while len(string) < 4:
+        string = "0" + string
     return string
 
 def ObjSize(Tstart, NowObj):
@@ -34,7 +36,7 @@ def ObjSize(Tstart, NowObj):
 def toDec(HexStr):
     ans = 0
     for i in HexStr:
-        ans = ans * 10 + HexDig.get(i)
+        ans = ans * 16 + HexDig.get(i)
     return ans
 
 def toHex(DecStr):

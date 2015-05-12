@@ -9,13 +9,13 @@ def pass2(logger, programSize, hrfout, ojfout):
         logger.log("Can not open input file for pass2 with read mode!", error_flag=True)
         return
     try:
-        ojout = open(hrfout, "w")
+        ojout = open(ojfout, "w")
     except:
         logger.log("Can not open output file for pass2 with write mode!", error_flag=True)
         return
 
     try:
-        hrout = open(ojfout, "w")
+        hrout = open(hrfout, "w")
     except:
         logger.log("Can not open output file for pass2 with write mode!", error_flag=True)
         return
@@ -26,96 +26,110 @@ def pass2(logger, programSize, hrfout, ojfout):
         word.remove("")
     if word[1] == "START":
         ojout.write(line)
-    hrout.write("H" + word[1] + " " * (6 - int((len(word[1]) + 1)) % 6) + "00" + word[3] + "00" + str(programSize) + "\n")
+    hrout.write("H" + word[1] + " " * (6 - int((len(word[1]) + 1)) % 6 + 1) + "00" + word[3] + "00" + hex(programSize)[2:].upper() + "\n")
     TStart = word[3]
     PgStart = word[3]
     ObjList = []
     objCount = 0
-    objc = ""
+    objsize = 0
     tmp = ""
     newLine = False
-    TextRecode = "T00"
+    TextRecode = "T00" + TStart
     objLine = ""
+    lineLength = 0
     (line, word) = getline(fin)
-    while word.get("OPCODE") is not "END":
-        if word.get("LABEL") is not ".":
+    while word.get("OPCODE") != "END":
+        if word.get("LABEL") != ".":
             if OPTAB.get(word.get("OPCODE")) is not None:
-                objc = "0" + OPTAB.get(word.get("OPCODE"))
-                if word.get("OPER") is not None:
+                word.update({"OBJECTCODE":OPTAB.get(word.get("OPCODE"))})
+                if word.get("OPER") is not None and word.get("OPER") is not "":
                     if len(word.get("OPER").split(",")) > 1:
                         tmp = word.get("OPER").split(",")[0]
                     else:
                         tmp = word.get("OPER")
                     if SYMTAB.get(tmp) is not None:
-                        print(SYMTAB.get(tmp))
+                        word.update({"OBJECTCODE":word.get("OBJECTCODE")+hex(SYMTAB.get(tmp)).upper()[2:]})
                         if len(word.get("OPER").split(",")) > 1:
-                            word.update({"OPERADDR":hex(SYMTAB.get(tmp) | 32768).upper()})
-                        else:
-                            word.update({"OPERADDR":hex(SYMTAB.get(tmp)).upper()})
+                            tmp = word.get("OBJECTCODE")[:2] + chr(ord(word.get("OBJECTCODE")[2])+8) + word.get("OBJECTCODE")[3:]
+                            word.update({"OBJECTCODE":tmp})
                     else:
                         logger.log("Undefined symbol!")
                         return
                 else:
-                    word.update({"OPERADDR":"0000"})
-            elif word.get("OPCODE") is "BYTE" or word.get("OPCODE") is "WORD":
+                    word.update({"OBJECTCODE":word.get("OBJECTCODE")+"0000"})
+            elif word.get("OPCODE") == "BYTE" or word.get("OPCODE") == "WORD":
                 tmp = word.get("OPER").split("\'")
                 if len(tmp) > 1:
-                    if tmp[0] is "C" or tmp[0] is "c":
-                        objc == hex(int(tmp[1])).upper()
+                    if tmp[0] == "C" or tmp[0] == "c":
+                        tmp2 = ""
+                        for i in tmp[1]:
+                            tmp2 += hex(ord(i))[2:].upper()
+
+                        word.update({"OBJECTCODE":tmp2})
                     else:
-                        objc = tmp[1]
+                        word.update({"OBJECTCODE":tmp[1].upper()})
                 else:
-                    tmp = hex(int(word.get("OPER"))).upper()
-                    if len(tmp) < 6:
-                        tmp += "0"
-                    objc = tmp
-            if word.get("OPCODE") is "RESW" or word.get("OPCODE") is "RESB":
+                    tmp = hex(int(word.get("OPER")))[2:].upper()
+                    while len(tmp) < 6:
+                        tmp = "0" + tmp
+                    word.update({"OBJECTCODE":tmp})
+
+            if word.get("OPCODE") == "RESW" or word.get("OPCODE") == "RESB":
                 newLine = True
-            if objCount is 10 or (newLine and objCount is not 0):
+            if objCount == 10 or (newLine and objCount != 0):
                 # write Text record to object program
                 lineLength = ObjSize(TStart, word.get("LOC"))
                 if lineLength < 16:
-                    tmp = "0" + hex(lineLength).upper()
+                    tmp = "0" + hex(lineLength)[2:].upper()
                 else:
-                    tmp = hex(lineLength).upper()
+                    tmp = hex(lineLength)[2:].upper()
+                TextRecode += tmp
                 for i in ObjList:
                     TextRecode += i
-                hrout.write(TextRecode)
-                TextRecode = "T00" + TStart
+                hrout.write(TextRecode+"\n")
+                ObjList = []
                 TStart = word.get("LOC")
-                newLine = False
-            elif objCount is 0 and newLine:
-                # Next Text Record
                 TextRecode = "T00" + TStart
-                TStart = word.get("LOC")
                 newLine = False
-            if word.get("OPCODE") is not "RESB" and word.get("OPCODE") is not "RESW":
-                ObjList.append(objc)
+                objCount = 0
+            if word.get("OPCODE") != "RESB" and word.get("OPCODE") != "RESW":
+                ObjList.append(word.get("OBJECTCODE"))
                 objCount+=1
 
-        ojout.write('{0:<4s}    {1:<8s} {2:<5s}  {3:<16s}  '.format(word.get("LOC"), word.get("LABEL"), word.get("OPCODE"), word.get("OPER")))
+        if word.get("LABEL") != ".":
+            ojout.write('{0:<4s}    {1:<8s} {2:<5s}  {3:<16s}  '.format(word.get("LOC"), word.get("LABEL") if word.get("LABEL") is not None else " ", word.get("OPCODE"), word.get("OPER") if word.get("OPER") is not None else " "))
+        else:
+            ojout.write(line)
         if word.get("LABEL") is not "." and word.get("OPCODE") is not "RESB" and word.get("OPCODE") is not "RESW":
-            ojout.write('{0:<6s}\n'.format(objc))
+            ojout.write('{0:<6s}\n'.format((word.get("OBJECTCODE") if word.get("OBJECTCODE") is not None else " ")))
         (line, word) = getline(fin)
+
+        if objCount == 0 and newLine:
+            if word.get("LOC") is not None:
+                TStart = word.get("LOC")
+                TextRecode = "T00" + word.get("LOC")
+                newLine = False
+                ObjList = []
     lineLength = ObjSize(TStart, word.get("LOC"))
     if lineLength < 16:
-        tmp = "0" + hex(lineLength).upper()
+        tmp = "0" + hex(lineLength)[2:].upper()
     else:
-        tmp = hex(lineLength).upper()
-    TextRecode = "T00" + tmp
+        tmp = hex(lineLength)[2:].upper()
+    TextRecode = "T00" + TStart + tmp
     for i in ObjList:
         TextRecode += i
-    hrout.write(TextRecode)
-    TextRecode = "E00" + PgStart + tmp + "\n"
-    hrout(TextRecode)
-    ojout.write('{0:<4s}    {1:<8s} {2:<5s}  {3:<16s}  '.format(word.get("LOC"), word.get("LABEL"), word.get("OPCODE"), word.get("OPER")))
+    hrout.write(TextRecode+"\n")
+    TextRecode = "E00" + hex(SYMTAB.get(word.get("OPER")))[2:].upper()
+    hrout.write(TextRecode+"\n")
+    ojout.write('{0:<4s}    {1:<8s} {2:<5s}  {3:<16s}  '.format(word.get("LOC"), word.get("LABEL") if word.get("LABEL") is not None else " ", word.get("OPCODE"), word.get("OPER") if word.get("OPER") is not None else " "))
 
 
 
 def getline(fin):
     line = fin.readline()
     word = {}
-    if line[0] is ".":
+
+    if line[0] == ".":
         word.update({"LABEL":"."})
         return line, word
 
@@ -142,48 +156,8 @@ def getline(fin):
     # lnsp = line[44:74].strip()
     # if lnsp != "":
     # word.update({"COMMENT": lnsp})
-    print (word)
     return line, word
 
 
 def writeline(fout, line, objcode):
     fout.write('{0} {1:<6s}\n'.format(line[:len(line)-2], objcode))
-
-
-# if word.get("OPCODE") == "BYTE" or word.get("OPCODE") == "WORD":
-#             if word.get("OPER")[0] is "X" or word.get("OPER")[0] is "C" or word.get("OPER")[0] is "x" or word.get("OPER")[0] is "c":
-#                 string = word.get("OPER").split("\'")[1]
-#             else:
-#                 string = word.get("OPER")
-#             if word.get("OPER")[0] == "X":
-#                 objc = string
-#             else:
-#                 objc = ""
-#                 for i in string:
-#                     objc = hex(ord(i))[2:]
-#         elif word.get("LOC") != ".":
-#             if OPTAB.get(word.get("OPCODE")) is not None:
-#                 # print(SYMTAB)
-#                 # print(word.get("OPER"))
-#                 print(SYMTAB.get(word.get("OPER")))
-#                 if SYMTAB.get(word.get("OPER")) is not None:
-#                     word.update({"OPERADDR": SYMTAB.get(word.get("OPER"))})
-#                 else:
-#                     word.update({"OPERADDR": 0})
-#             else:
-#                 word.update({"OPERADDR": 0})
-#             objc = OPTAB.get(word.get("OPCODE")) + str(word.get("OPERADDR"))
-#             if len(word.get("OPER").split(",")) > 1:
-#                 objca = []
-#                 for i in objc:
-#                     objca.append(ord(i))
-#                 objca[2] += 1
-#                 if objca[2] > 9:
-#                     objca[2] -= 10
-#                     objca[1] += 1
-#                 if objca[1] > 9:
-#                     objca[1] -= 10
-#                     objca[0] += 1
-#                 objc = ""
-#                 for i in objca:
-#                     objc += chr(i)

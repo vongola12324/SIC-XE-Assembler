@@ -25,9 +25,9 @@ def pass1(logger, filename):
     if word[1] == "START":
         logger.log("Label \"START\" found at line 0!")
         logger.log("Use " + str(word[2]) + " as default LOCCTR and STARTADDR!")
-        STARTADDR = toDec(word[2])
+        STARTADDR = int(word[2], 16)
         LOCCTR = STARTADDR
-        fout.write("{0:04X}    {1:<8s} {2:<5s}  {3:<18s}".format(toDec(word[2]), word[0], word[1], str(word[2])) + "\n")
+        fout.write("{0:04X}    {1:<8s} {2:<5s}  {3:<18s}".format(int(word[2], 16), word[0], word[1], str(word[2])) + "\n")
     else:
         logger.log("Label \"START\" not found!")
         logger.log("Use 0 as default LOCCTR and STARTADDR!")

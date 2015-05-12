@@ -2,7 +2,6 @@ from pass1 import pass1
 from pass2 import pass2
 from log import Logger
 import sys
-import os
 
 # Program Info
 __version__ = '1.0'
@@ -93,16 +92,27 @@ else:
         logger.log("Pass 1 Finished.", error_flag="Important")
 
 # PASS 2, if pass1 successful
-pass2(logger=logger, programSize=programSize, hrfout=hrout, ojfout=ojout)
-if logger.getErrorFlag():
+try:
+    pass2(logger=logger, programSize=programSize, hrfout=hrout, ojfout=ojout)
+
+except:
     if debug_mode is True:
-        logger.log("Pass 1 Failed, view the error log to get error message!", error_flag=True)
+        logger.log("Pass 2 Failed, view the error log to get error message!", error_flag=True)
     else:
-        logger.log("Pass 1 Failed, enable debug mode to get more imformation!", error_flag=True)
+        logger.log("Pass 2 Failed, enable debug mode to get more imformation!", error_flag=True)
     logger.endLog()
     sys.exit(1)
 else:
-    logger.log("Pass 2 Finished.")
+    err_flag = logger.getErrorFlag()
+    if err_flag is True:
+        if debug_mode is True:
+            logger.log("Pass 2 Failed, view the error log to get error message!", error_flag=True)
+        else:
+            logger.log("Pass 2 Failed, enable debug mode to get more imformation!", error_flag=True)
+        logger.endLog()
+        sys.exit(1)
+    else:
+        logger.log("Pass 2 Finished.", error_flag="Important")
 
 if not logger.getErrorFlag():
     logger.endLog()

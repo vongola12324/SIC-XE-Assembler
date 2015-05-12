@@ -25,6 +25,7 @@ def showHelp():
     print("\t--in\tSet input file")
     print("\t--hrout\tSet output file(Head Record)")
     print("\t--ojout\tSet output file(Object List)")
+    print("\t--debug\tEnable debug mode.")
     print()
 
 # Check Debug Mode
@@ -73,13 +74,19 @@ else:
 try:
     programSize = pass1(logger=logger, filename=fin)
 except:
-    logger.log("Pass 1 Failed, view the error log to get error message", error_flag=True)
+    if debug_mode is True:
+        logger.log("Pass 1 Failed, view the error log to get error message!", error_flag=True)
+    else:
+        logger.log("Pass 1 Failed, enable debug mode to get more imformation!", error_flag=True)
     logger.endLog()
     sys.exit(1)
 else:
     err_flag = logger.getErrorFlag()
     if err_flag is True:
-        logger.log("Pass 1 Failed, view the error log to get error message", error_flag=True)
+        if debug_mode is True:
+            logger.log("Pass 1 Failed, view the error log to get error message!", error_flag=True)
+        else:
+            logger.log("Pass 1 Failed, enable debug mode to get more imformation!", error_flag=True)
         logger.endLog()
         sys.exit(1)
     else:
@@ -88,7 +95,10 @@ else:
 # PASS 2, if pass1 successful
 pass2(logger=logger, programSize=programSize, hrfout=hrout, ojfout=ojout)
 if logger.getErrorFlag():
-    logger.log("Pass 2 Failed, view the error log to get error message", error_flag=True)
+    if debug_mode is True:
+        logger.log("Pass 1 Failed, view the error log to get error message!", error_flag=True)
+    else:
+        logger.log("Pass 1 Failed, enable debug mode to get more imformation!", error_flag=True)
     logger.endLog()
     sys.exit(1)
 else:

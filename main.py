@@ -57,7 +57,6 @@ if hrout == None:
 else:
     logger.log("HR Out: " + hrout)
 
-
 ojout = getArgvValue("--ojout")
 if ojout == None:
     ojout = input("Enter Output Filename[ObjectList.txt]: ")

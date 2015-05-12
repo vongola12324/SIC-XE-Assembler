@@ -3,7 +3,6 @@ import platform
 import time
 import datetime
 
-
 class Logger():
     __debug_mode = False
     __err = None

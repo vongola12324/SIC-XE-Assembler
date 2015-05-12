@@ -123,8 +123,6 @@ def pass2(logger, programSize, hrfout, ojfout):
     hrout.write(TextRecode+"\n")
     ojout.write('{0:<4s}    {1:<8s} {2:<5s}  {3:<16s}  '.format(word.get("LOC"), word.get("LABEL") if word.get("LABEL") is not None else " ", word.get("OPCODE"), word.get("OPER") if word.get("OPER") is not None else " "))
 
-
-
 def getline(fin):
     line = fin.readline()
     word = {}
@@ -132,7 +130,6 @@ def getline(fin):
     if line[0] == ".":
         word.update({"LABEL":"."})
         return line, word
-
 
     # Get Loc (0:8)
     lnsp = line[0:4].strip()

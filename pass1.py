@@ -1,6 +1,5 @@
 from data import *
 
-
 def pass1(logger, filename):
     # Open file
     try:
@@ -108,9 +107,5 @@ def getline(fin):
     # word.update({"COMMENT": lnsp})
     return line, word
 
-
 def writeline(fout, locctr, word):
-    fout.write(
-        '{0:<04X}    {1:<8s} {2:<5s}  {3:<18s}\n'.format(locctr,
-                                                       word.get("LABEL") if word.get("LABEL") is not None else " ",
-                                                       word.get("OPCODE"), word.get("OPER")))
+    fout.write('{0:<04X}    {1:<8s} {2:<5s}  {3:<18s}\n'.format(locctr, word.get("LABEL") if word.get("LABEL") is not None else " ",  word.get("OPCODE"), word.get("OPER")))

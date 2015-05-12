@@ -1,4 +1,5 @@
 import os
+import platform
 import time
 import datetime
 
@@ -14,23 +15,30 @@ class Logger():
     __error_flag = False
     __tstart = None
 
+    dirChar = ""
+
     def __init__(self, debug_mode=False):
+
+        if platform.system() is "Windows":
+            dirChar = "\\"
+        else:
+            dirChar = "/"
         self.__debug_mode = debug_mode
         if not os.path.exists("Log"):
             os.makedirs("Log")
         if self.__debug_mode:
-            if os.access("Log\\" + self.__log_name, os.W_OK):
-                self.__log = open("Log\\" + self.__log_name)
+            if os.access("Log" + dirChar + self.__log_name, os.W_OK):
+                self.__log = open("Log" + dirChar + self.__log_name)
                 self.__lastlog_time = self.__log.readline()[1:20]
                 self.__log.close()
-                os.rename("Log\\" + self.__log_name, "Log\\" + self.__lastlog_time + "-" + self.__log_name)
-            self.__log = open("Log\\" + self.__log_name, "w")
-        if os.access("Log\\" + self.__err_name, os.W_OK):
-            self.__err = open("Log\\" + self.__err_name)
+                os.rename("Log" + dirChar + self.__log_name, "Log" + dirChar + self.__lastlog_time + "-" + self.__log_name)
+            self.__log = open("Log" + dirChar + self.__log_name, "w")
+        if os.access("Log" + dirChar + self.__err_name, os.W_OK):
+            self.__err = open("Log" + dirChar + self.__err_name)
             self.__lastlog_time = self.__err.readline()[1:20]
             self.__err.close()
-            os.rename("Log\\" + self.__err_name, "Log\\" + self.__lastlog_time + "-" + self.__err_name)
-        self.__err = open("Log\\" + self.__err_name, "w")
+            os.rename("Log" + dirChar + self.__err_name, "Log" + dirChar + self.__lastlog_time + "-" + self.__err_name)
+        self.__err = open("Log" + dirChar + self.__err_name, "w")
         t = time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime(time.time()))
         if self.__debug_mode:
             self.__log.write("[" + t + "]" + "INFO: Assembler Start!\n")
